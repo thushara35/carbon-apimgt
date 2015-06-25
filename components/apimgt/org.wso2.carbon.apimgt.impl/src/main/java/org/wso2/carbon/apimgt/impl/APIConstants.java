@@ -709,4 +709,6 @@ public final class APIConstants {
     public static final String AUTH_APPLICATION_USER_LABEL = "Application User";
     public static final String AUTH_APPLICATION_AND_APPLICATION_USER_LABEL = "Application & Application User";
 
+    // api custom property will be used in api rxt to define custom properties
+    public static final String API_CUSTOM_PROPERTY_PREFIX = "overview_newproperty";
 }
