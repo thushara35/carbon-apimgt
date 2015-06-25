@@ -294,6 +294,16 @@ public final class APIUtil {
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
 
+            // This is to get user defined attributes from registry.
+            Map<String, String> apiProperties = new HashMap<String, String>();
+            String[] allAttributeKeys = artifact.getAttributeKeys();
+            for (String attributeKey : allAttributeKeys) {
+                if (attributeKey.startsWith(APIConstants.API_CUSTOM_PROPERTY_PREFIX)) {
+                    apiProperties.put(attributeKey, artifact.getAttribute(attributeKey));
+                }
+            }
+            api.setApiProperties(apiProperties);
+
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {		
             	cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
@@ -474,6 +484,16 @@ public final class APIUtil {
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
 
+            // This is to get user defined attributes from registry.
+            Map<String, String> apiProperties = new HashMap<String, String>();
+            String[] allAttributeKeys = artifact.getAttributeKeys();
+            for (String attributeKey : allAttributeKeys) {
+                if (attributeKey.startsWith(APIConstants.API_CUSTOM_PROPERTY_PREFIX)) {
+                    apiProperties.put(attributeKey, artifact.getAttribute(attributeKey));
+                }
+            }
+            api.setApiProperties(apiProperties);
+
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
                 String strCacheTimeout = artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT);
@@ -643,6 +663,16 @@ public final class APIUtil {
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
 
+            // This is to get user defined attributes from registry.
+            Map<String, String> apiProperties = new HashMap<String, String>();
+            String[] allAttributeKeys = artifact.getAttributeKeys();
+            for (String attributeKey : allAttributeKeys) {
+                if (attributeKey.startsWith(APIConstants.API_CUSTOM_PROPERTY_PREFIX)) {
+                    apiProperties.put(attributeKey, artifact.getAttribute(attributeKey));
+                }
+            }
+            api.setApiProperties(apiProperties);
+
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
             	cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
@@ -795,6 +825,17 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED, api.getDestinationStatsEnabled());
 
 			artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
+
+            // This is to support adding new rxt field(property).
+            Map properties = api.getApiProperties();
+            if (properties != null) {
+                for (Object key : properties.keySet()) {
+                    artifact.setAttribute((String) key, (String) properties.get(key));
+                    if (log.isDebugEnabled()) {
+                        log.debug((String) key + " " + (String) properties.get(key));
+                    }
+                }
+            }
 
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
@@ -2000,6 +2041,17 @@ public final class APIUtil {
                api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
                api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
                api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+
+               // This is to get user defined attributes from registry.
+               Map<String, String> apiProperties = new HashMap<String, String>();
+               String[] allAttributeKeys = artifact.getAttributeKeys();
+               for (String attributeKey : allAttributeKeys) {
+                   if (attributeKey.startsWith(APIConstants.API_CUSTOM_PROPERTY_PREFIX)) {
+                       apiProperties.put(attributeKey, artifact.getAttribute(attributeKey));
+                   }
+               }
+               api.setApiProperties(apiProperties);
+
                int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
                try {
                	cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));

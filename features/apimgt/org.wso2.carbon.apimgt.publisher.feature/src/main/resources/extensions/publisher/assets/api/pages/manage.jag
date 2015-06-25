@@ -113,6 +113,36 @@ require('/modules/publisher.js').exec(function(ctx) {
 			}
 		}
 	}
+
+    // Updating the apiProperties with unselected values in option fields
+    var apiPropertiesFields = api.apiProperties;
+    var rxtManager = rxtAPI.core.rxtManager(user.tenantId);
+
+    for (var key in apiPropertiesFields) {
+        if (apiPropertiesFields.hasOwnProperty(key)) {
+            var rxtfieldobj = rxtManager.getRxtField('api', apiPropertiesFields[key].key);
+            // Below section only execute for option fields
+            if (rxtfieldobj != null && rxtfieldobj.type == 'options') {
+                var notSelectedValueObj = [];
+                var optionValues = rxtfieldobj.values[0].value;
+                // Traversing through values to find unselected values
+                for (var count = 0; count < optionValues.length; count++) {
+                    // ignoring selected value
+                    if (apiPropertiesFields[key].value != optionValues[count].value) {
+                        notSelectedValueObj.push({
+                            "value": optionValues[count].value
+                        });
+                    }
+                }
+                if (notSelectedValueObj != []) {
+                    apiPropertiesFields[key].notSelectedValues = notSelectedValueObj;
+                }
+            }
+        }
+    }
+    // Saving updated apiPropertiesFields back to its origin
+    api.apiProperties = apiPropertiesFields;
+
 	api.filteredEnvironmentList = filteredEnvironmentList;
 	api.id = options.id;
 	output.api = api;
@@ -172,6 +202,50 @@ require('/modules/publisher.js').exec(function(ctx) {
 	output.api.filteredTiers = filteredTiers;
 
 	output.api.isPermitted = apiProxy.hasPublishPermission().permitted;
+
+    // Adding user difined rxt properties.
+    var rxtDataArr = [];
+    var rxtFields = page.rxt.content.table.overview.fields;
+    for (var a in rxtFields) {
+        var rxtFieldJson = rxtFields[a];
+        if (rxtFieldJson.name.name != null && rxtFieldJson.name.name.lastIndexOf('newproperty', 0) === 0) {
+            if (rxtFieldJson.type == 'text') {
+                var displayName = rxtFieldJson.name.name.replace('newproperty', '');
+                rxtDataArr.push({
+                    "type": rxtFieldJson.type,
+                    "isTypeText": rxtFieldJson.type == "text" ? true : false,
+                    "name": rxtFieldJson.name.name,
+                    "label": rxtFieldJson.name.label,
+                    "fullName": rxtFieldJson.name.fullName,
+                    "labelName": rxtFieldJson.name.label.replace('NewProperty', ''),
+                    "displayName": displayName.substring(0, 1).toUpperCase() + displayName.substring(1)
+                });
+            } else if (rxtFieldJson.type == 'options') {
+
+                // Generating selection options object, if type == 'options'
+                var valueObj = [];
+                var values = rxtFieldJson.values[0].value;
+                for (var count = 0; count < values.length; count++) {
+                    valueObj.push({
+                        "value": values[count].value
+                    });
+                }
+
+                var displayName = rxtFieldJson.name.name.replace('newproperty', '');
+                rxtDataArr.push({
+                    "type": rxtFieldJson.type,
+                    "isTypeText": rxtFieldJson.type == "text" ? true : false,
+                    "value": valueObj,
+                    "name": rxtFieldJson.name.name,
+                    "label": rxtFieldJson.name.label,
+                    "fullName": rxtFieldJson.name.fullName,
+                    "labelName": rxtFieldJson.name.label.replace('NewProperty', ''),
+                    "displayName": displayName.substring(0, 1).toUpperCase() + displayName.substring(1)
+                });
+            }
+        }
+    }
+    output.rxtProperty = rxtDataArr;
 
 	//Check configurations specific properties
 	var config = require('/extensions/assets/api/config/config.json');

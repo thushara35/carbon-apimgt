@@ -53,6 +53,7 @@ var apipublisher = {};
     var API_PROVIDER = "provider";
     var API_NAME = "name";
     var API_VERSION = "version";
+    var API_CUSTOM_PROPERTY_PREFIX = "overview_newproperty";
 
     var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
     var log = new Log("jaggery-modules.api-manager.publisher");
@@ -536,6 +537,39 @@ var apipublisher = {};
                 }
             }
 
+            var propertiesMap = new Packages.java.util.HashMap();
+            propertiesMap = api.getApiProperties();
+            var apiProperty;
+            var apiPropertyJson = [];
+            if (propertiesMap != null && propertiesMap.size() != 0) {
+                var iterator = propertiesMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    apiProperty = iterator.next();
+                    var key = apiProperty.getKey();
+                    var value = apiProperty.getValue();
+
+                    var displayName = key.replace(API_CUSTOM_PROPERTY_PREFIX, '');
+                    // Converting display name to a sentence
+                    var labelNameWithSpace = displayName.replaceAll(
+                        String.format("%s|%s|%s",
+                            "(?<=[A-Z])(?=[A-Z][a-z])",
+                            "(?<=[^A-Z])(?=[A-Z])",
+                            "(?<=[A-Za-z])(?=[^A-Za-z])"
+                        ),
+                        " "
+                    );
+                    // Converting first letter in sentence to uppercase
+                    var labelName = labelNameWithSpace.substring(0, 1).toUpperCase() + labelNameWithSpace.substring(1);
+                    apiPropertyJson.push({
+                        "key": key,
+                        "value": value,
+                        "notSelectedValues": null,
+                        "labelName": labelName,
+                        "displayName": displayName
+                    });
+                }
+            }
+
             apiOb = {
                 name: api.getId().getApiName(),
                 description: api.getDescription(),
@@ -583,7 +617,8 @@ var apipublisher = {};
                 implementation: api.getImplementation(),
                 hasDefaultVersion: hasDefaultVersion,
                 environments: APIUtil.writeEnvironmentsToArtifact(api),
-                currentDefaultVersion: defaultVersion
+                currentDefaultVersion: defaultVersion,
+                apiProperties: apiPropertyJson
             };
             return {
                 error:false,
@@ -764,6 +799,14 @@ var apipublisher = {};
             apiOb.setResponseCache(api.responseCache);
             apiOb.setCacheTimeout(api.cacheTimeout);
             apiOb.setSwagger(api.swagger);
+
+            var propertiesMap = new Packages.java.util.HashMap();
+            apiProperties = api.properties;
+            for (var key=0; key < apiProperties.length; key++) {
+                propertiesMap.put(apiProperties[key].split('-')[0],apiProperties[key].split('-')[1]);
+            }
+            apiOb.setApiProperties(propertiesMap);
+
             success = this.impl.updateAPIManagePhase(apiOb);
             if (log.isDebugEnabled()) {
                 log.debug("manageAPI : " + api.name + "-" + api.version);

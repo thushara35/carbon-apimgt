@@ -2897,6 +2897,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	 */
 	public boolean updateAPIManagePhase(API updatedAPI) throws APIManagementException, FaultGatewaysException {
 		boolean success = false;
+        Map<String, String> properties = new HashMap<String, String>();
 
 		String provider = updatedAPI.getId().getProviderName();
 		String name = updatedAPI.getId().getApiName();
@@ -2923,6 +2924,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		String technicalOwnerEmail = updatedAPI.getTechnicalOwnerEmail();
 		Set<String> environments = updatedAPI.getEnvironments();
 		String responseCache = updatedAPI.getResponseCache();
+        properties = updatedAPI.getApiProperties();
 		int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
 		if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
 			responseCache = APIConstants.ENABLED;
@@ -3000,6 +3002,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			api.removeAllTiers();
 			api.addAvailableTiers(updatedTiers);
 		}
+
+        if (properties != null) {
+            api.setApiProperties(properties);
+        }
 
 		api.setLastUpdated(new Date());
 

@@ -18,7 +18,11 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provider's & system's view of API
@@ -97,6 +101,16 @@ public class API implements Serializable{
     private boolean isPublishedDefaultVersion=false;
 
     private Set<String> environments;
+
+    private Map<String, String> apiProperties;
+
+    public Map getApiProperties() {
+        return apiProperties;
+    }
+
+    public void setApiProperties(Map apiProperties) {
+        this.apiProperties = apiProperties;
+    }
 
     public Set<String> getEnvironments() {
         return environments;

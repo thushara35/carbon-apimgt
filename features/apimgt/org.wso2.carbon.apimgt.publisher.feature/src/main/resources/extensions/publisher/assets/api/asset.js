@@ -20,6 +20,7 @@ asset.manager = function(ctx) {
     var apiPublisher =  require('apipublisher').apipublisher;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
+    var API_CUSTOM_PROPERTY_PREFIX = "overview_newproperty";
 
     //TODO Move to common module
     var isValiedImage = function(image){
@@ -279,6 +280,18 @@ asset.manager = function(ctx) {
                 apiData.cacheTimeout= options.attributes.cacheTimeout;
                 apiData.destinationStats= options.attributes.destinationStatsEnabled;
                 apiData.environments = options.attributes.environments;
+
+                apiData.properties = [];
+                rxtFields = options.attributes;
+                for (var key in rxtFields) {
+                    if (rxtFields.hasOwnProperty(key) && key.lastIndexOf(API_CUSTOM_PROPERTY_PREFIX, 0) === 0) {
+                        apiData.properties.push(key + '-' + rxtFields[key]);
+                        if (log.isDebugEnabled()) {
+                            log.debug(key + ' -> ' + rxtFields[key]);
+                        }
+                    }
+                }
+
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.manageAPI(apiData);
                 if (result != null && result.error) {
